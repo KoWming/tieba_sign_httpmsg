@@ -26,7 +26,7 @@ function cron_sign_pushplus() {
 
         $lastNotificationDate = option::uget('tieba_last_notification_date', $id);
         if ($today == $lastNotificationDate || $currentHourMinute != $pushplusTime) {
-            //continue; // 今天已进行过通知或当前时间不匹配，跳过此用户
+            continue; // 今天已进行过通知或当前时间不匹配，跳过此用户
         }
 
         // 初始化计数器

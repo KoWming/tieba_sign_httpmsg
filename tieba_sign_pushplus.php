@@ -4,11 +4,11 @@ if (!defined('SYSTEM_ROOT')) { die('Insufficient Permissions'); }
 
 /*
 Plugin Name: 每日签到PushPlus推送
-Version: 1.0
-Plugin URL: https://github.com/BigBlueBaby/tieba_sign_pushplus
+Version: 1.1
+Plugin URL: https://github.com/CrazyCodingConclave/tieba_sign_pushplus
 Description: 贴吧云签到每日签到完成情况PushPlus推送插件
-Author: BigBlueBaby
-Author URL: https://github.com/BigBlueBaby
+Author: CrazyCodingConclave
+Author URL: https://github.com/CrazyCodingConclave
 */
 
 // 定义设置页面的函数 tieba_sign_pushplus_setting
@@ -49,6 +49,6 @@ function tieba_sign_pushplus_set() {
 }
 
 // 注册保存设置和展示设置的钩子
-addAction('set_save1', 'tieba_sign_pushplus_set'); // 保存设置时调用 tieba_sign_pushplus_set
-addAction('set_2', 'tieba_sign_pushplus_setting'); // 显示设置页面时调用 tieba_sign_pushplus_setting
+addAction('set_save1'， 'tieba_sign_pushplus_set'); // 保存设置时调用 tieba_sign_pushplus_set
+addAction('set_2'， 'tieba_sign_pushplus_setting'); // 显示设置页面时调用 tieba_sign_pushplus_setting
 ?>

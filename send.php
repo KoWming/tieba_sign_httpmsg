@@ -5,7 +5,7 @@ if (!defined('SYSTEM_ROOT')) { die('Insufficient Permissions'); }
 // 声明全局变量 $m，通常用于数据库操作
 global $m;
 
-function cron_sign_pushplus() {
+function cron_sign_httpmsg() {
     global $m;
     $currentHourMinute = date("H:i");
     $today = date("Y-m-d");
@@ -16,16 +16,16 @@ function cron_sign_pushplus() {
         $id = $fetch['id'];
 
         // 获取通知参数设置
-        $pushplusEnable = option::uget('tieba_pushplus_enable', $id);
-        $pushplusToken = option::uget('tieba_pushplus_token', $id);
-        $pushplusTime = option::uget('tieba_pushplus_time', $id);
+        $httpmsgEnable = option::uget('tieba_httpmsg_enable', $id);
+        $httpMsgurl = option::uget('tieba_httpmsg_url', $id);
+        $httpmsgTime = option::uget('tieba_httpmsg_time', $id);
 
-        if ($pushplusEnable == 0 || empty($pushplusToken) || empty($pushplusTime)) {
+        if ($httpmsgEnable == 0 || empty($httpMsgurl) || empty($httpmsgTime)) {
             continue; // 未开启通知或参数错误，跳过此用户
         }
 
         $lastNotificationDate = option::uget('tieba_last_notification_date', $id);
-        if ($today == $lastNotificationDate || $currentHourMinute != $pushplusTime) {
+        if ($today == $lastNotificationDate || $currentHourMinute != $httpmsgTime) {
             continue; // 今天已进行过通知或当前时间不匹配，跳过此用户
         }
 
@@ -34,12 +34,13 @@ function cron_sign_pushplus() {
         $successCount = 0;
         $failureCount = 0;
 
+        // 初始化通知内容
+        $notificationContent = "";
         $query2 = $m->query("SELECT * FROM `".DB_NAME."`.`".DB_PREFIX."tieba` WHERE `uid` = $id");
         while ($tiebaInfo = $m->fetch_array($query2)) {
             $totalCount++; // 统计总数
             $tiebaName = $tiebaInfo['tieba'];
             $isSuccess = $tiebaInfo['status'] == 0;
-            $statusColor = $isSuccess ? '#B7D6C1' : '#E0A4A1';
             $statusText = $isSuccess ? '签到成功' : '签到失败';
 
             // 更新成功和失败计数
@@ -47,20 +48,26 @@ function cron_sign_pushplus() {
                 $successCount++;
             } else {
                 $failureCount++;
+                $failureNotificationContent .= "$tiebaName: $statusText \n"; // 使用段落标签，只显示失败列表
             }
-
-            $notificationContent .= "<p>$tiebaName: <span style='color: $statusColor;'>$statusText</span></p>"; // 使用段落标签
         }
 
         // 添加统计信息到通知第一行
-        $notificationContent = "<h2>总数: <span style='color: #B7D6C1;'>$totalCount</span> | " .
-            "签到成功数: <span style='color: #B7D6C1;'>$successCount</span> | " .
-            "签到失败数: <span style='color: #E0A4A1;'>$failureCount</span></h2>" .
-            "<h2>用户名: $name</h2>" .
-            "<h3>贴吧列表:</h3>" . $notificationContent;
+        $notificationContent = "总数: $totalCount | ".
+            "签到成功数: $successCount | ".
+            "签到失败数: $failureCount" . "\n".
+            "用户名: $name" . "\n";
+
+        // 只有在有失败的签到时才添加失败列表
+        if ($failureCount > 0) {
+            $notificationContent .= "签到失败列表: \n $failureNotificationContent" . "\n";
+        }
+
+        $notificationContent .= "\n推送时间: $today $currentHourMinute";
 
         // 发送通知
-        sendPushPlusNotification($pushplusToken, $notificationContent);
+        sendHttpMsgNotification($notificationContent, $httpMsgurl);
+
         // 更新最后通知日期
         option::uset('tieba_last_notification_date', $today, $id);
     }
@@ -69,30 +76,29 @@ function cron_sign_pushplus() {
         $notificationContent,
         $name,
         $id,
-        $pushplusEnable ? '已开启' : '未开启',
-        $pushplusTime
+        $httpmsgEnable ? '已开启' : '未开启',
+        $httpmsgTime
     );
-
 
 }
 
-function sendPushPlusNotification($token, $content) {
+function sendHttpMsgNotification($content, $httpMsgurl) {
     // 构建请求内容
     $data = json_encode([
-        'token' => $token,
         'title' => '贴吧云签到通知',
-        'content' => $content
+        'text' => $content
     ]);
 
     // 设置 HTTP 请求的选项
     $options = [
         'http' => [
-            'header' => "Content-Type: application/json; charset=utf-8",
+            'header' => "Content-Type: application/json",
             'method' => 'POST',
             'content' => $data
         ]
     ];
     $context = stream_context_create($options);
-    file_get_contents('http://www.pushplus.plus/send/', false, $context);
+    // 发送请求并获取响应
+    $response = file_get_contents($httpMsgurl, false, $context);
 }
 ?>

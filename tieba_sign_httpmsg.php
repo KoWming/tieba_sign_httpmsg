@@ -5,7 +5,7 @@ if (!defined('SYSTEM_ROOT')) { die('Insufficient Permissions'); }
 /*
 Plugin Name: 自定义消息推送
 Version: 1.8
-Plugin URL: https://github.com/KoWming/tieba_sign_pushplus
+Plugin URL: https://github.com/KoWming/tieba_sign_httpmsg
 Description: 贴吧云签到每日签到完成情况自定义消息推送插件
 Author: KoWming
 Author URL: https://github.com/KoWming

@@ -1,6 +1,6 @@
-# 贴吧云签到每日签到完成情况自定义消息推送插件
+# 贴吧云签到每日签到完成情况自定义消息推送
 
-[MoeNetwork/Tieba-Cloud-Sign: 百度贴吧云签到](https://github.com/MoeNetwork/Tieba-Cloud-Sign)平台可用的贴吧云签到每日签到完成情况PushPlus推送插件
+[MoeNetwork/Tieba-Cloud-Sign: 百度贴吧云签到](https://github.com/MoeNetwork/Tieba-Cloud-Sign)平台可用的贴吧云签到每日签到完成情况使用HTTP请求推送
 
 小白魔改了一下CrazyCodingConclave大佬的代码：
 
